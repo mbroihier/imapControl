@@ -1,0 +1,7 @@
+//
+//   Warning!!! Do NOT commit the .h file created by cmake
+//
+#define encodeText_VERSION_NUMBER @PROJECT_VERSION@
+#ifndef SUPPRESS_BUILD_MAIN
+#define ENCODE_BUILD_MAIN
+#endif

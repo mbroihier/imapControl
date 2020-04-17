@@ -1,0 +1,4 @@
+//
+//   Warning!!! Do NOT commit the .h file created by cmake
+//
+#define decodeText_VERSION_NUMBER @PROJECT_VERSION@

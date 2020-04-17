@@ -1,0 +1,8 @@
+//
+//   Warning!!! Do NOT commit the .h file created by cmake
+//
+#define imapControl_VERSION_NUMBER @PROJECT_VERSION@
+#define IMAP_URL @IMAP_URL@
+#define USER_INFO @USER_INFO@
+#define COMMAND_PATTERN @COMMAND_PATTERN@
+#define START_PATH @START_PATH@

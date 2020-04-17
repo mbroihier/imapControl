@@ -1,0 +1,27 @@
+#
+#  Set IMAP_URL, USER_INFO, COMMAND_PATTERN, and START_PATH to the values necessary to access your email account and your script
+#  Do NOT commit this file after alteration because you'll be storing that information into your repository.
+#
+cmake_minimum_required(VERSION 3.7)
+project(imapControl)
+set(PROJECT_VERSION "1.1")
+set(IMAP_URL imap.gmail.com)
+set(USER_INFO mailbox@url.ofimapmail.com:mailboxPassword)
+set(START_PATH /my/thing/to/start)
+set(COMMAND_PATTERN "\"COMMAND_STREAM((( [0-9,a-f,A-F]{2})){5,1024})\"")
+set(DEBUG 1)
+configure_file("src/imapControlConfig.h.in" "include/imapControlConfig.h")
+configure_file("src/encodeTextConfig.h.in" "include/encodeTextConfig.h")
+configure_file("src/decodeTextConfig.h.in" "include/decodeTextConfig.h")
+include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${CMAKE_BINARY_DIR}/include")
+file(GLOB SRC "src/*.cc")
+set(IMAP_SRC src/lock.cc src/locks.cc src/decodeTextUtil.cc src/imapControl.cc)
+set(ENC_SRC src/duplicateKeys src/lock.cc src/encodeText.cc)
+set(DEC_SRC src/lock.cc src/decodeTextUtil src/decodeText.cc)
+add_executable(imapControl ${IMAP_SRC})
+add_executable(encodeText ${ENC_SRC})
+add_executable(decodeText ${DEC_SRC})
+target_link_libraries(imapControl curl)
+target_link_libraries(encodeText)
+target_link_libraries(decodeText)
