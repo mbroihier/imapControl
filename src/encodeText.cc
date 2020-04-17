@@ -7,6 +7,7 @@
  */
 /* ---------------------------------------------------------------------- */
 #include <getopt.h>
+#include <time.h>
 #include <unistd.h>
 #include "encodeText.h"
 #include "encodeTextConfig.h"
@@ -84,6 +85,10 @@ encodeText::encodeText() {
   int size;
   bool done = false;
   unsigned int rand_seed = 31416;
+  struct timespec seedTime;
+  clock_gettime(CLOCK_BOOTTIME, &seedTime);
+  rand_seed = seedTime.tv_nsec & 0xffffffff;
+
   std::map<char, int>  duplicates;
   do {
     overlay.seed = rand_r(&rand_seed);
