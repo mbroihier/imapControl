@@ -80,15 +80,6 @@ int main(int argc, char *argv[]) {
   int size = index;
   size = textDecoderUtilInstance.translate(incomingBytes, &translatedString, size);
 
-  fprintf(stdout, "{ ");
-  for (int index = 0; index < size; index++) {
-    if (index == 0) {
-      fprintf(stdout, "0x%2.2x", translatedString[index]);
-    } else {
-      fprintf(stdout, ", 0x%2.2x", translatedString[index]);
-    }
-  }
-  fprintf(stdout, " }\n");
   fprintf(stdout, "%s\n", translatedString);
 
   free(translatedString);

@@ -45,6 +45,7 @@ class imapControl {
 };
 #define STRINGIZER(arg)  #arg
 #define STR_VALUE(arg) STRINGIZER(arg)
-static bool debug;
+static bool debug = DEBUG;
+static int  pollRate = POLL;
 size_t static acceptReply(void *whatCameBack, size_t size, size_t blocks, void *myPointer);
 #endif  // INCLUDE_IMAPCONTROL_H_

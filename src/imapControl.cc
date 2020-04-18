@@ -8,8 +8,8 @@
 /* ---------------------------------------------------------------------- */
 #include <getopt.h>
 #include <unistd.h>
-#include "imapControl.h"
 #include "imapControlConfig.h"
+#include "imapControl.h"
 /* ---------------------------------------------------------------------- */
 
 
@@ -187,7 +187,8 @@ int imapControl::run() {
   if (highestmodseq != oldHighestmodseq) {  // something has changed, see if new mail has a request
     char newURL[1024];
     oldHighestmodseq = highestmodseq;
-    for (int uid = newestUID; uid > 0; uid--) {
+    int readNoMore = std::max(0, newestUID - MAX_EMAILS);  // limit how many emails are read (no more than MAX_EMAILS)
+    for (int uid = newestUID; uid > readNoMore; uid--) {
       snprintf(newURL, sizeof(newURL), "imaps://" STR_VALUE(IMAP_URL)"/INBOX;UID=%d", uid);
       free(bufferInfo.buffer);
       bufferInfo.buffer = 0;
@@ -229,9 +230,8 @@ int imapControl::run() {
 /* ---------------------------------------------------------------------- */
 
 imapControl::imapControl() {
-  debug = 1;
-  int lockParameters[] = {1807, 45289, 214326, 0, 0, 0};
-  const char * names[] = {"action1", 0};
+  int lockParameters[] = {LOCK_PARAMETERS};
+  const char * names[] = {LOCK_NAMES};
   locksObject = new locks(lockParameters, names);
   bufferInfo.buffer = 0;
   bufferInfo.size = 1;
@@ -316,7 +316,7 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Entering main processing loop" << std::endl;
   while (!doneProcessing) {
-    sleep(30);
+    sleep(pollRate);
     doneProcessing = imapControlInstance.run();
     std::cout << "Cycle completed - status: " << doneProcessing << std::endl;
   }
