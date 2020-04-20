@@ -5,3 +5,5 @@
 #ifndef SUPPRESS_BUILD_MAIN
 #define ENCODE_BUILD_MAIN
 #endif
+#define STRINGIZER(arg)  #arg
+#define STR_VALUE(arg) STRINGIZER(arg)

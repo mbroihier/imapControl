@@ -1,0 +1,4 @@
+//
+//   Warning!!! Do NOT commit the .h file created by cmake
+//
+#define DEBUG @DEBUG@

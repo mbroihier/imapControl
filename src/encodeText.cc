@@ -143,12 +143,12 @@ int main(int argc, char *argv[]) {
   while ((c = getopt_long(argc, argv, "h", longOpts, NULL)) >= 0) {
     switch (c) {
       case 'h': {
-        fprintf(stderr, "Text Encode VERSION %f\n", encodeText_VERSION_NUMBER);
+        fprintf(stderr, "Text Encode VERSION %s\n", STR_VALUE(encodeText_VERSION_NUMBER));
         fprintf(stderr, USAGE_STR, argv[0]);
         return -2;
       }
       case 1: {
-        fprintf(stderr, "Text Encode VERSION %f\n", encodeText_VERSION_NUMBER);
+        fprintf(stderr, "Text Encode VERSION %s\n", STR_VALUE(encodeText_VERSION_NUMBER));
         fprintf(stderr, USAGE_STR, argv[0]);
         return -2;
       }

@@ -2,3 +2,5 @@
 //   Warning!!! Do NOT commit the .h file created by cmake
 //
 #define decodeText_VERSION_NUMBER @PROJECT_VERSION@
+#define STRINGIZER(arg)  #arg
+#define STR_VALUE(arg) STRINGIZER(arg)

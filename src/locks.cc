@@ -9,7 +9,24 @@
  *
  */
 /* ---------------------------------------------------------------------- */
+#include "../include/locksConfig.h"
 #include "../include/locks.h"
+/* ---------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------- */
+/*
+ *      getLastLockMatchedIndex.cc -- get the index of the lock from the
+ *                                    last match
+ *
+ *      Copyright (C) 2020 
+ *          Mark Broihier
+ *
+ */
+/* ---------------------------------------------------------------------- */
+int locks::getLastLockMatchedIndex() {
+  return lastLockMatchedIndex;
+}
 /* ---------------------------------------------------------------------- */
 
 /* ---------------------------------------------------------------------- */
@@ -30,12 +47,16 @@ int locks::checkList(int seed) {
     for (int index = 0; index < numberOfKeys; index++) {
       if (seed == keyList[index]) {
         found = true;  // this is a recent repeat
-        std::cout << "found " << seed << std::endl;
+        if (debug) {
+          fprintf(stdout, "found %8.8x\n", seed);
+        }
         break;
       }
     }
     if (!found) {  // put this key in the list
-      std::cout << "Putting seed into list " << seed << std::endl;
+      if (debug) {
+        fprintf(stdout, "Putting seed (%8.8x) into list\n", seed);
+      }
       keyList[keyIndex] = seed;
       keyIndex++;
       if (keyIndex == OLD_KEY_LIST_SIZE) {
@@ -46,13 +67,17 @@ int locks::checkList(int seed) {
       }
     } else {  // we have seen this before
       returnCode = 2;
+      lastLockMatchedIndex = -1;  // say we didn't match
     }
   } else {
-    std::cout << "First time forced failure with seed " << seed << std::endl;
+    if (debug) {
+      fprintf(stdout, "First time forced failure with seed %8.8x\n", seed);
+    }
     returnCode = 2;  // always fail the first time
     keyList[0] = seed;
     keyIndex = 1;
     numberOfKeys = 1;
+    lastLockMatchedIndex = -1;  // say we didn't match
   }
   return returnCode;
 }
@@ -71,7 +96,7 @@ int locks::checkList(int seed) {
 /* ---------------------------------------------------------------------- */
 int locks::check(std::string digitsString) {
   char buffer[MAX_BYTES];
-  std::regex digitPattern(" [0-9a-fA-f]{2}");
+  std::regex digitPattern(" 0*x*[0-9a-fA-F]{2}");
   bool none = false;
   int index = 0;
 
@@ -79,11 +104,8 @@ int locks::check(std::string digitsString) {
   std::cmatch digits;
   do {
     const char * incomingRemainder = incomingRemainderString.c_str();
-    std::cout << "now searching str: " << incomingRemainderString << std::endl;
-    std::cout << "now searching c_str: " << incomingRemainder << std::endl;
     if (std::regex_search(incomingRemainder, digits, digitPattern)) {
       buffer[index] = std::stoi(digits[0], 0, 16);
-      std::cout << "new entry: " << std::hex << static_cast<int>(buffer[index]) << " " << std::endl;;
       incomingRemainderString = digits[0].second;
       index++;
     } else {
@@ -91,7 +113,6 @@ int locks::check(std::string digitsString) {
     }
   } while (!none);
   int candidateKeySize = index;
-  std::cout << std::endl;
   bool ok = false;
   char * key = 0;
   int keySize = 0;
@@ -101,14 +122,12 @@ int locks::check(std::string digitsString) {
     status = lockList[index]->check(buffer, candidateKeySize);
     keySize = lockList[index]->getARealKey(&key);
     seed = lockList[index]->seedOf();
-    std::cout << "A valid key for this lock and seed would be:" << std::endl;
-    for (int i = 0; i < keySize; i++) {
-      std::cout << std::hex << static_cast<int>(key[i]) << " ";
-    }
-    std::cout << std::endl;
     if (status == 1) {  // we got a match, can stop
-      std::cout << "This key seems to be valid" << std::endl;
+      if (debug) {
+        fprintf(stdout, "This key seems to be valid, index is: %d", index);
+      }
       ok = true;
+      lastLockMatchedIndex = index;
       break;
     }
   }
@@ -116,17 +135,28 @@ int locks::check(std::string digitsString) {
   if (ok) {  // if it was valid, the next question is whether we've seen it before
     returnCode = checkList(seed);
   } else {  // lets try to translate this into a command message
-    std::cout << "See if this is a more complex encoded message" << std::endl;
+    if (debug) {
+      fprintf(stdout, "See if this is a more complex encoded message\n");
+    }
     char * message = 0;
     for (int index = 0; index < numberOfLocks; index++) {
       int size = decoderList[index]->translate(buffer, &message, candidateKeySize);
       if (strncmp(message, lockList[index]->nameOf(), size) == 0) {
+        if (debug) {
+          fprintf(stdout, "This key seems to be valid, index is: %d\n", index);
+        }
+        lastLockMatchedIndex = index;
         returnCode = checkList(seed);
         break;
       }
     }
+    if (message) {  // release the allocated memory
+      free(message);
+    }
   }
-  std::cout << "check with locks returns status of " << returnCode << std::endl;
+  if (debug) {
+    fprintf(stdout, "check with locks object returns status of %d\n", returnCode);
+  }
   return returnCode;
 }
 /* ---------------------------------------------------------------------- */
@@ -144,6 +174,7 @@ int locks::check(std::string digitsString) {
 locks::locks(const int * lockParameters, const char ** names) {
   numberOfLocks = 0;
   numberOfKeys = 0;
+  lastLockMatchedIndex = -1;
   int configurationParameters[3];
   if (lockParameters) {
     while (*lockParameters != 0) {

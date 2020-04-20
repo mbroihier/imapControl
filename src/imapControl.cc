@@ -77,9 +77,14 @@ size_t static acceptReply(void *whatCameBack,
 
 /* ---------------------------------------------------------------------- */
 void imapControl::doCommand() {
-  fprintf(stdout, "Issuing command\n");
-  char startPath[] = STR_VALUE(START_PATH);
-  system(startPath);
+  const char * startPaths[] = { START_PATHS };
+  int index = locksObject->getLastLockMatchedIndex();
+  if (index >= 0) {
+    fprintf(stdout, "Issuing command: %s\n", startPaths[index]);
+    system(startPaths[index]);
+  } else {
+    fprintf(stderr, "%s %s line %d - Internal error - no index to match command table\n", __FILE__, __func__, __LINE__);
+  }
 }
 /* ---------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------- */
@@ -94,21 +99,21 @@ void imapControl::doCommand() {
 
 /* ---------------------------------------------------------------------- */
 int imapControl::parseExamineRequest() {
-  std::regex existsPat(" ([0-9]+) EXISTS");
+  std::regex uidNextPat("UIDNEXT ([0-9]+)");
   std::regex highestmodseqPat("HIGHESTMODSEQ ([0-9]+)");
   std::cmatch matches;
   if (!bufferInfo.buffer) {
     std::cerr << "No buffer to examine - curl operation to examine mailbox must have failed" << std::endl;
     exit(1);
   }
-  std::regex_search(bufferInfo.buffer, matches, existsPat);
+  std::regex_search(bufferInfo.buffer, matches, uidNextPat);
   if (debug) {
     for (int i = 0; i < static_cast<int>(matches.size()); i++) {
       std::cerr << matches[i] << std::endl;
     }
   }
   if (matches.size() != 2) return 1;
-  newestUID = std::stoi(matches[1]);
+  newestUID = std::stoi(matches[1]) - 1;
   std::regex_search(bufferInfo.buffer, matches, highestmodseqPat);
   if (debug) {
     for (int i = 0; i < static_cast<int>(matches.size()); i++) {
@@ -138,6 +143,7 @@ int imapControl::parseEmail() {
     std::string substring = matches.str(1);  // get digits following text
     returnCode = verifyPattern(substring);
   } else {
+    fprintf(stderr, "Skipping email with no apparent command message\n");
     returnCode = 0;
   }
   return returnCode;  // 2 - not ok, stop; 1 - ok process; 0 - ok continue
@@ -186,23 +192,39 @@ int imapControl::run() {
   }
   if (highestmodseq != oldHighestmodseq) {  // something has changed, see if new mail has a request
     char newURL[1024];
+    memset(newURL, 0, sizeof(newURL));
     oldHighestmodseq = highestmodseq;
     int readNoMore = std::max(0, newestUID - MAX_EMAILS);  // limit how many emails are read (no more than MAX_EMAILS)
     for (int uid = newestUID; uid > readNoMore; uid--) {
-      snprintf(newURL, sizeof(newURL), "imaps://" STR_VALUE(IMAP_URL)"/INBOX;UID=%d", uid);
       free(bufferInfo.buffer);
       bufferInfo.buffer = 0;
       bufferInfo.size = 1;
       if (!debug) {
-        curl_easy_setopt(getEmail, CURLOPT_URL, newURL);
+        snprintf(newURL, sizeof(newURL), "imaps://" STR_VALUE(IMAP_URL)"/INBOX;UID=%d", uid);
+        int rc = curl_easy_setopt(getEmail, CURLOPT_URL, newURL);
+        if (rc) {
+          fprintf(stderr, "curl_easy_setopt returned error! Code: %d\n", rc);
+        }
       }
       returnCode = curl_easy_perform(getEmail);
       if (returnCode) {
         fprintf(stderr, "Mailbox read failed: %d\n", returnCode);
-        if (returnCode == 78) {  // did not find the email at this UID
-          continue;
+        if (returnCode == 78) {  // let's try one more time
+          returnCode = curl_easy_perform(getEmail);
         }
-        return 3;
+        if (returnCode == 78) {  // did not find the email at this UID
+          fprintf(stderr, "command was: %s\n", newURL);
+          if (bufferInfo.buffer == 0) {
+            fprintf(stderr, "no returned data\n");
+          } else {
+            fprintf(stderr, "received: %s\n", bufferInfo.buffer);
+          }
+          continue;  // continue with next UID
+        } else {
+          if (returnCode) {
+            return 3;  // fail out - this was bad
+          }
+        }
       }
       returnCode = parseEmail();
       if (returnCode > 1) {
@@ -296,7 +318,7 @@ int main(int argc, char *argv[]) {
 
   int c;
 
-  std::cout << "IMAP Control VERSION " << imapControl_VERSION_NUMBER << "." << std::endl;
+  fprintf(stdout, "IMAP Control VERSION %s\n", STR_VALUE(imapControl_VERSION_NUMBER));
   if (argc > 1) {
     fprintf(stderr, USAGE_STR, argv[0]);
     return -2;
@@ -314,11 +336,11 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  std::cout << "Entering main processing loop" << std::endl;
+  fprintf(stdout, "Entering main processing loop\n");
   while (!doneProcessing) {
     sleep(pollRate);
     doneProcessing = imapControlInstance.run();
-    std::cout << "Cycle completed - status: " << doneProcessing << std::endl;
+    fprintf(stdout, "Cycle completed - status: %d\n", doneProcessing);
   }
 
   return 0;
