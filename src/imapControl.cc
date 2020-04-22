@@ -52,7 +52,7 @@ size_t static acceptReply(void *whatCameBack,
     return 0;
   }
   if (debug)
-    fprintf(stderr,
+    fprintf(stdout,
             " About to copy what came back into storage buffer - old size: %lu, new size: %lu, length: %lu\n",
             workingPointer->size, completeReturnBufferSize + workingPointer->size, completeReturnBufferSize);
   memcpy(&workingPointer->buffer[workingPointer->size-1], whatCameBack,
@@ -60,7 +60,7 @@ size_t static acceptReply(void *whatCameBack,
   workingPointer->size += completeReturnBufferSize;
   workingPointer->buffer[workingPointer->size-1] = 0;  // terminate "string"
 
-  if (debug) fprintf(stderr, "Reply:\n %s\n", workingPointer->buffer);
+  if (debug) fprintf(stdout, "Reply:\n %s\n", workingPointer->buffer);
 
   return completeReturnBufferSize;
 }
@@ -103,13 +103,13 @@ int imapControl::parseExamineRequest() {
   std::regex highestmodseqPat("HIGHESTMODSEQ ([0-9]+)");
   std::cmatch matches;
   if (!bufferInfo.buffer) {
-    std::cerr << "No buffer to examine - curl operation to examine mailbox must have failed" << std::endl;
+    fprintf(stderr, "No buffer to examine - curl operation to examine mailbox must have failed\n");
     exit(1);
   }
   std::regex_search(bufferInfo.buffer, matches, uidNextPat);
   if (debug) {
     for (int i = 0; i < static_cast<int>(matches.size()); i++) {
-      std::cerr << matches[i] << std::endl;
+      fprintf(stdout, "%s\n", matches[i]);
     }
   }
   if (matches.size() != 2) return 1;
@@ -117,7 +117,7 @@ int imapControl::parseExamineRequest() {
   std::regex_search(bufferInfo.buffer, matches, highestmodseqPat);
   if (debug) {
     for (int i = 0; i < static_cast<int>(matches.size()); i++) {
-      std::cerr << matches[i] << std::endl;
+      fprintf(stdout, "%s\n", matches[i]);
     }
   }
   if (matches.size() != 2) return 1;
@@ -143,7 +143,7 @@ int imapControl::parseEmail() {
     std::string substring = matches.str(1);  // get digits following text
     returnCode = verifyPattern(substring);
   } else {
-    fprintf(stderr, "Skipping email with no apparent command message\n");
+    fprintf(stdout, "Skipping email with no apparent command message\n");
     returnCode = 0;
   }
   return returnCode;  // 2 - not ok, stop; 1 - ok process; 0 - ok continue
@@ -224,11 +224,12 @@ int imapControl::run() {
           if (returnCode) {
             return 3;  // fail out - this was bad
           }
+          fprintf(stderr, "Reread was successful\n");
         }
       }
       returnCode = parseEmail();
       if (returnCode > 1) {
-        fprintf(stderr, "parsing of email found nothing to trigger a command: %d\n", returnCode);
+        fprintf(stdout, "parsing of email found nothing to trigger a command: %d\n", returnCode);
         break;
       }
       if (returnCode == 1) {  // command found
@@ -276,7 +277,7 @@ imapControl::imapControl() {
   }
   curl_easy_perform(examineMailbox);
   if (parseExamineRequest()) {
-    std::cerr << "imapControl failed to initialize - could not read mailbox information" << std::endl;
+    fprintf(stderr, "imapControl failed to initialize - could not read mailbox information\n");
     exit(1);
   }
   oldHighestmodseq = highestmodseq;

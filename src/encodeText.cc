@@ -84,7 +84,6 @@ encodeText::encodeText() {
   bool done = false;
   unsigned int rand_seed = 31416;
   struct timespec seedTime;
-  //clock_gettime(CLOCK_BOOTTIME, &seedTime);
   clock_gettime(CLOCK_MONOTONIC, &seedTime);
   rand_seed = seedTime.tv_nsec & 0xffffffff;
 
@@ -109,7 +108,7 @@ encodeText::encodeText() {
         duplicates[c] = characterToKeyObject[c]->insert(lockObject->seedOf());
       }
     } else {
-      std::cerr << "Shouldn't have gotten a key this small: " << size <<std::endl;
+      fprintf(stderr, "Shouldn't have gotten a key this small: %d", size);
     }
   } while (!done);
 }
