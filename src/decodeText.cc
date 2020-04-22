@@ -32,7 +32,6 @@ int main(int argc, char *argv[]) {
     return -2;
   }
 
-  int doneProcessing = 0;
   while ((c = getopt_long(argc, argv, "h", longOpts, NULL)) >= 0) {
     switch (c) {
       case 'h': {

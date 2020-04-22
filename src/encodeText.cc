@@ -38,7 +38,6 @@ static struct option longOpts[] = {
 int  encodeText::translate(const char * incomingText, char ** translatedText) {
   char * workingPointer = 0;
   int size = strlen(incomingText);
-  int index = 0;
   int messageSize = 0;
   int charSize;
   char * key;
@@ -81,12 +80,12 @@ encodeText::encodeText() {
   int lockParameters[] = {1807, 45289, 214326, 0};
   const char * names[] = {"encoder", 0};
   lockObject = new lock(lockParameters, *names);
-  char c;
   int size;
   bool done = false;
   unsigned int rand_seed = 31416;
   struct timespec seedTime;
-  clock_gettime(CLOCK_BOOTTIME, &seedTime);
+  //clock_gettime(CLOCK_BOOTTIME, &seedTime);
+  clock_gettime(CLOCK_MONOTONIC, &seedTime);
   rand_seed = seedTime.tv_nsec & 0xffffffff;
 
   std::map<char, int>  duplicates;
@@ -139,7 +138,6 @@ int main(int argc, char *argv[]) {
     return -2;
   }
 
-  int doneProcessing = 0;
   while ((c = getopt_long(argc, argv, "h", longOpts, NULL)) >= 0) {
     switch (c) {
       case 'h': {
@@ -168,9 +166,9 @@ int main(int argc, char *argv[]) {
   fprintf(stdout, "{ ");
   for (int index = 0; index < size; index++) {
     if (index == 0) {
-      fprintf(stdout, "0x%2.2x", translatedString[index]);
+      fprintf(stdout, "0x%2.2x", static_cast<unsigned char>(translatedString[index]));
     } else {
-      fprintf(stdout, ", 0x%2.2x", translatedString[index]);
+      fprintf(stdout, ", 0x%2.2x", static_cast<unsigned char>(translatedString[index]));
     }
   }
   fprintf(stdout, " }\n");

@@ -53,7 +53,7 @@ size_t static acceptReply(void *whatCameBack,
   }
   if (debug)
     fprintf(stderr,
-            " About to copy what came back into storage buffer - old size: %d, new size: %d, length: %d\n",
+            " About to copy what came back into storage buffer - old size: %lu, new size: %lu, length: %lu\n",
             workingPointer->size, completeReturnBufferSize + workingPointer->size, completeReturnBufferSize);
   memcpy(&workingPointer->buffer[workingPointer->size-1], whatCameBack,
          completeReturnBufferSize);

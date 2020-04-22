@@ -21,7 +21,6 @@ class imapControl {
   CURL *examineMailbox;
   CURL *getEmail;
   int newestUID;
-  int oldUID;
   int highestmodseq;
   int oldHighestmodseq;
   int serialNumber;

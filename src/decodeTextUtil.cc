@@ -24,7 +24,6 @@
 /* ---------------------------------------------------------------------- */
 int  decodeTextUtil::translate(char * incomingText, char ** translatedText, int size) {
   char * workingPointer = 0;
-  int index = 0;
   int messageSize = 0;
   int charSize;
   char * key;
@@ -68,10 +67,7 @@ int  decodeTextUtil::translate(char * incomingText, char ** translatedText, int 
 /* ---------------------------------------------------------------------- */
 
 decodeTextUtil::decodeTextUtil(int * parameters, const char * name) {
-  char * key;
   lockObject = new lock(parameters, name);
-  char c;
-  int size;
 }
 /* ---------------------------------------------------------------------- */
 
