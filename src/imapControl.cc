@@ -266,6 +266,12 @@ imapControl::imapControl() {
   serialNumber = 0;
   oldSerialNumber = 0;
   examineMailbox = curl_easy_init();
+  curl_version_info_data * versionData;
+  versionData = curl_version_info(CURLVERSION_NOW);
+  if (versionData->version_num < 0x074000) {  // this code wants 7.64.0 or greater
+    fprintf(stderr, "This curl version is not new enough - detected version is: %8.8x\n", versionData->version_num);
+    exit(1);
+  }
   if (debug) {
     fprintf(stdout, "Building a request to examain a pseudo mailbox\n");
     curl_easy_setopt(examineMailbox, CURLOPT_URL, "http://localhost:3000/examine");

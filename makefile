@@ -1,10 +1,10 @@
-PARAMS_LIBS = -g -lm -lstdc++ -lfftw3 -lcurl
+PARAMS_LIBS = -g -lm -lstdc++ -lcurl
 
 INCLUDES = -I./include
 
 CC=gcc
 
-CFLAGS= $(if $(shell uname -a | grep -i armv), -c -Wall -DLE_MACHINE -D_GNU_SOURCE $(PARAMS_LOOPVECT) $(PARAMS_SIMD) $(PARAMS_MISC), -c -Wall -DLE_MACHINE -D_GNU_SOURCE )
+CFLAGS= -c -Wall -DLE_MACHINE -D_GNU_SOURCE
 CXX = $(CC)
 CXXFLAGS = $(CFLAGS) # set these flags for use of suffix rules for cc
 LDFLAGS= $(PARAMS_LIBS)
