@@ -108,20 +108,16 @@ int imapControl::parseExamineRequest() {
   }
   std::regex_search(bufferInfo.buffer, matches, uidNextPat);
   if (debug) {
-    const char * cString = 0;
     for (int i = 0; i < static_cast<int>(matches.size()); i++) {
-      cString = matches.str(i).c_str();
-      fprintf(stdout, "%s\n", cString);
+      fprintf(stdout, "%s\n", matches.str(i).c_str());
     }
   }
   if (matches.size() != 2) return 1;
   newestUID = std::stoi(matches[1]) - 1;
   std::regex_search(bufferInfo.buffer, matches, highestmodseqPat);
   if (debug) {
-    const char * cString = 0;
     for (int i = 0; i < static_cast<int>(matches.size()); i++) {
-      cString = matches.str(i).c_str();
-      fprintf(stdout, "%s\n", cString);
+      fprintf(stdout, "%s\n", matches.str(i).c_str());
     }
   }
   if (matches.size() != 2) return 1;

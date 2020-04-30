@@ -1,0 +1,4 @@
+#!/bin/bash
+sudo /sbin/iptables-restore < /home/pi/imapControl/iptables.ipv4.nat.wlogs.disable
+/home/pi/imapControl/build/imapControl
+

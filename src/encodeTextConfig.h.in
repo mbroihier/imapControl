@@ -2,8 +2,7 @@
 //   Warning!!! Do NOT commit the .h file created by cmake
 //
 #define encodeText_VERSION_NUMBER @PROJECT_VERSION@
-#ifndef SUPPRESS_BUILD_MAIN
-#define ENCODE_BUILD_MAIN
-#endif
 #define STRINGIZER(arg)  #arg
 #define STR_VALUE(arg) STRINGIZER(arg)
+#define LOCK_PARAMETERS @LOCK_PARAMETERS@
+#define LOCK_NAMES @LOCK_NAMES@

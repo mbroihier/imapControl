@@ -1,7 +1,7 @@
-#ifndef INCLUDE_ENCODETEXT_H_
-#define INCLUDE_ENCODETEXT_H_
+#ifndef INCLUDE_ENCODETEXTUTIL_H_
+#define INCLUDE_ENCODETEXTUTIL_H_
 /*
- *      encodeText.h - header for text encoder
+ *      encodeTextUtil.h - header for text encoder
  *
  *      Copyright (C) 2020
  *          Mark Broihier
@@ -15,7 +15,7 @@
 #include "duplicateKeys.h"
 #include "lock.h"
 /* ---------------------------------------------------------------------- */
-class encodeText {
+class encodeTextUtil {
  private:
   union { char bytes[32];
            int  seed;
@@ -25,8 +25,8 @@ class encodeText {
   std::map<char, duplicateKeys *>::iterator characterToKeyObjectIterator;
  public:
   int translate(const char * incomingText, char ** translatedText);
-  encodeText();
-  ~encodeText();
+  encodeTextUtil(int * lockParameters, const char ** names, int lockIndex);
+  ~encodeTextUtil();
 };
 
-#endif  // INCLUDE_ENCODETEXT_H_
+#endif  // INCLUDE_ENCODETEXTUTIL_H_

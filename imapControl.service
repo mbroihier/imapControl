@@ -1,0 +1,12 @@
+[Unit]
+Description=IMAP CONTROL
+After=network.target
+
+[Service]
+ExecStart=/home/pi/imapControl/imapControlWrapper
+Restart=always
+RestartSec=10
+
+[Install]
+Alias=imapControl.service
+WantedBy=default.target

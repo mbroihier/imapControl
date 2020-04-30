@@ -9,7 +9,7 @@
 #include <getopt.h>
 #include <time.h>
 #include <unistd.h>
-#include "encodeText.h"
+#include "encodeTextUtil.h"
 #include "encodeTextConfig.h"
 /* ---------------------------------------------------------------------- */
 
@@ -25,110 +25,6 @@ static struct option longOpts[] = {
   { NULL, 0, NULL, 0 }
 };
 
-/* ---------------------------------------------------------------------- */
-/*
- *      translate.cc -- translate the text into an encoded version
- *
- *      Copyright (C) 2020 
- *          Mark Broihier
- *
- */
-
-/* ---------------------------------------------------------------------- */
-int  encodeText::translate(const char * incomingText, char ** translatedText) {
-  char * workingPointer = 0;
-  int size = strlen(incomingText);
-  int messageSize = 0;
-  int charSize;
-  char * key;
-  for (int index = 0; index < size; index++) {
-    overlay.seed = characterToKeyObject[incomingText[index]]->getNext();
-    lockObject->check(overlay.bytes, 4);
-    charSize = lockObject->getARealKey(&key);
-    if (charSize > 6) {
-      charSize = charSize - 1;
-    } else {
-      fprintf(stderr, "Error in translation - this should not happen\n");
-      exit(-1);
-    }
-    if (index == 0) {
-      workingPointer = reinterpret_cast<char *>(malloc(charSize));
-    } else {
-      workingPointer = reinterpret_cast<char *>(realloc(workingPointer, charSize + messageSize));
-    }
-    memcpy(workingPointer + messageSize, key, charSize);
-    messageSize += charSize;
-  }
-  *translatedText = workingPointer;
-  return messageSize;
-}
-/* ---------------------------------------------------------------------- */
-
-/* ---------------------------------------------------------------------- */
-/*
- *      encodeText - constructor
- *
- *      Copyright (C) 2020
- *          Mark Broihier
- *
- */
-
-/* ---------------------------------------------------------------------- */
-
-encodeText::encodeText() {
-  char * key;
-  int lockParameters[] = {1807, 45289, 214326, 0};
-  const char * names[] = {"encoder", 0};
-  lockObject = new lock(lockParameters, *names);
-  int size;
-  bool done = false;
-  unsigned int rand_seed = 31416;
-  struct timespec seedTime;
-  clock_gettime(CLOCK_MONOTONIC, &seedTime);
-  rand_seed = seedTime.tv_nsec & 0xffffffff;
-
-  std::map<char, int>  duplicates;
-  do {
-    overlay.seed = rand_r(&rand_seed);
-    lockObject->check(overlay.bytes, 4);
-    size = lockObject->getARealKey(&key);
-    if (size > 6) {
-      int c = key[size - 1];
-      characterToKeyObjectIterator = characterToKeyObject.find(c);
-      if (characterToKeyObjectIterator != characterToKeyObject.end()) {
-        duplicates[c] = characterToKeyObject[c]->insert(lockObject->seedOf());
-        if (duplicates.size() >= 256) {
-          done = true;
-          for (std::map<char, int>::iterator it = duplicates.begin(); it != duplicates.end(); it++) {
-            done &= (it->second > 3);
-          }
-        }
-      } else {
-        characterToKeyObject[c] = new duplicateKeys();
-        duplicates[c] = characterToKeyObject[c]->insert(lockObject->seedOf());
-      }
-    } else {
-      fprintf(stderr, "Shouldn't have gotten a key this small: %d", size);
-    }
-  } while (!done);
-}
-/* ---------------------------------------------------------------------- */
-
-/* ---------------------------------------------------------------------- */
-/*
- *      encodeText - destructor
- *
- *      Copyright (C) 2020 
- *          Mark Broihier
- *
- */
-/* ---------------------------------------------------------------------- */
-
-encodeText::~encodeText() {
-  delete lockObject;
-}
-/* ---------------------------------------------------------------------- */
-#ifdef ENCODE_BUILD_MAIN
 int main(int argc, char *argv[]) {
   int c;
 
@@ -158,7 +54,9 @@ int main(int argc, char *argv[]) {
 
   char * translatedString = 0;
 
-  encodeText textEncoderInstance;
+  int lockParameters[] = {LOCK_PARAMETERS};
+  const char * names[] = {LOCK_NAMES};
+  encodeTextUtil textEncoderInstance(lockParameters, names, 0);
 
   int size = textEncoderInstance.translate(incomingString, &translatedString);
 
@@ -176,5 +74,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-#endif
-/* ---------------------------------------------------------------------- */
+
