@@ -1,0 +1,11 @@
+//
+//   Warning!!! Do NOT commit the .h file created by cmake
+//
+#define sendUtil_VERSION_NUMBER @PROJECT_VERSION@
+#define PROTOCOL @PROTOCOL@
+#define URL @URL@
+#define SOURCE_DESTINATION @SOURCE_DESTINATION@
+#define CREDENTIALS @CREDENTIALS@
+#define DEBUG @DEBUG@
+#define LOCK_PARAMETERS @LOCK_PARAMETERS@
+#define LOCK_NAMES @LOCK_NAMES@

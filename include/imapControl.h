@@ -15,6 +15,7 @@
 #include <regex>
 #include <string>
 #include "locks.h"
+#include "sendUtil.h"
 /* ---------------------------------------------------------------------- */
 class imapControl {
  private:
