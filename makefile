@@ -9,7 +9,7 @@ CXX = $(CC)
 CXXFLAGS = $(CFLAGS) # set these flags for use of suffix rules for cc
 LDFLAGS= $(PARAMS_LIBS)
 
-COMMONSRC=src/lock.cc src/locks.cc src/decodeTextUtil.cc src/encodeTextUtil.cc src/duplicateKeys.cc
+COMMONSRC=src/lock.cc src/locks.cc src/decodeTextUtil.cc src/encodeTextUtil.cc src/duplicateKeys.cc src/sendUtil.cc
 COMMONOBJ=$(COMMONSRC:.cc=.o)
 IMAPCONTROLSRC = src/imapControl.cc
 IMAPCONTROLOBJ=$(IMAPCONTROLSRC:.cc=.o)

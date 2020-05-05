@@ -234,8 +234,8 @@ int imapControl::run() {
       }
       if (returnCode == 1) {  // command found
         doCommand();
-        if (debug) sendUtil * sendUtilInstance = new sendUtil("Subject: Command executed", bufferInfo.buffer);
-        fprintf(stdout, "%s\n", bufferInfo.buffer);
+        sendUtil * sendUtilInstance = new sendUtil("Subject: Command executed", bufferInfo.buffer);
+        if (debug) fprintf(stdout, "%s\n", bufferInfo.buffer);
         sendUtilInstance->send();
         delete(sendUtilInstance);
         break;
