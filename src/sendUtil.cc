@@ -120,8 +120,6 @@ void sendUtil::send() {
 sendUtil::sendUtil(const char * subjectOfMessage, char * message) {
   if (debug) fprintf(stdout, "%s %s %s \n", url, source_destination, credentials);
   strncpy(subject, subjectOfMessage, sizeof(subject));
-  fprintf(stdout, "%s\n", subject);
-  fprintf(stdout, "%s\n", subjectOfMessage);
   strncpy(payload, message, sizeof(payload));
 }
 /* ---------------------------------------------------------------------- */
