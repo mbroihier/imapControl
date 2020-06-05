@@ -182,8 +182,8 @@ int imapControl::run() {
   bufferInfo.size = 1;
   int returnCode = curl_easy_perform(examineMailbox);
   if (returnCode) {
-    fprintf(stderr, "Mailbox examination failed: %d\n", returnCode);
-    return 1;
+    fprintf(stderr, "Mailbox examination failed: %d, skip this cycle\n", returnCode);
+    return 0;  // used to be 1, this terminated the process more often than I expected
   }
   returnCode = parseExamineRequest();
   if (returnCode) {
