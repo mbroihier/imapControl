@@ -121,7 +121,7 @@ void sendCommand::getAndEncodeMessage(const char * message, int lockIndex) {
  */
 
 /* ---------------------------------------------------------------------- */
-void sendCommand::send() {
+CURLcode sendCommand::send() {
   lineNumber = 0;
   sendMail = curl_easy_init();
   curl_easy_setopt(sendMail, CURLOPT_URL, url);
@@ -137,9 +137,10 @@ void sendCommand::send() {
   if (debug) {
     curl_easy_setopt(sendMail, CURLOPT_VERBOSE, 1L);
   }
-  curl_easy_perform(sendMail);
+  CURLcode result = curl_easy_perform(sendMail);
   curl_slist_free_all(list);
   curl_easy_cleanup(sendMail);
+  return result;
 }
 /* ---------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------- */
@@ -204,7 +205,11 @@ int main(int argc, char *argv[]) {
     index = std::stoi(argv[2]);
   }
   sendCommandInstance.getAndEncodeMessage(argv[1], index);
-  sendCommandInstance.send();
+  if (CURLE_OK != sendCommandInstance.send()) {
+    fprintf(stderr, "sendCommand Failed\n");
+  } else {
+    fprintf(stdout, "sendCommand Successful\n");
+  }
   return 0;
 }
 /* ---------------------------------------------------------------------- */

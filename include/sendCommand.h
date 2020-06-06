@@ -26,7 +26,7 @@ class sendCommand {
   CURL *sendMail;
 
  public:
-  void send(void);
+  CURLcode send(void);
   void getAndEncodeMessage(const char * message, int lockIndex);
   sendCommand();
   ~sendCommand();
