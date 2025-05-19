@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo /sbin/iptables-restore < /home/pi/imapControl/iptables.ipv4.nat.enable
