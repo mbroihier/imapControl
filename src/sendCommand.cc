@@ -101,12 +101,12 @@ void sendCommand::getAndEncodeMessage(const char * message, int lockIndex) {
   int n = snprintf(payload, sizeof(payload), "COMMAND_STREAM {");
   for (int index = 0; index < size; index++) {
     if (index == 0) {
-      n += snprintf(payload+n, sizeof(payload), " 0x%2.2x", static_cast<unsigned char>(binaryPayload[index]));
+      n += snprintf(payload+n, sizeof(payload) - n, " 0x%2.2x", static_cast<unsigned char>(binaryPayload[index]));
     } else {
-      n += snprintf(payload+n, sizeof(payload), ", 0x%2.2x", static_cast<unsigned char>(binaryPayload[index]));
+      n += snprintf(payload+n, sizeof(payload) - n, ", 0x%2.2x", static_cast<unsigned char>(binaryPayload[index]));
     }
   }
-  snprintf(payload+n, sizeof(payload), " }\n");
+  snprintf(payload+n, sizeof(payload) - n, " }\n");
   free(binaryPayload);
 }
 /* ---------------------------------------------------------------------- */
