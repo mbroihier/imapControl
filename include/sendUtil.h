@@ -27,7 +27,7 @@ class sendUtil {
   CURL *sendMail;
 
  public:
-  void send(void);
+  CURLcode send(void);
   sendUtil(const char * subjectOfMessage, char * message);
   ~sendUtil();
 };

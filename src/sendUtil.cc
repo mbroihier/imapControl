@@ -85,7 +85,7 @@ size_t static sendInfo(void *whatsGoing,
  */
 
 /* ---------------------------------------------------------------------- */
-void sendUtil::send() {
+CURLcode sendUtil::send() {
   lineNumber = 0;
   sendMail = curl_easy_init();
   curl_easy_setopt(sendMail, CURLOPT_URL, url);
@@ -101,9 +101,10 @@ void sendUtil::send() {
   if (debug) {
     curl_easy_setopt(sendMail, CURLOPT_VERBOSE, 1L);
   }
-  curl_easy_perform(sendMail);
+  CURLcode result = curl_easy_perform(sendMail);
   curl_slist_free_all(list);
   curl_easy_cleanup(sendMail);
+  return result;
 }
 /* ---------------------------------------------------------------------- */
 
